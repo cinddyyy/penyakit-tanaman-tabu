@@ -1,0 +1,11 @@
+streamlit
+mysql-connector-python
+opencv-python
+matplotlib
+numpy
+pandas
+joblib
+Pillow
+tensorflow
+scikit-learn
+seaborn
