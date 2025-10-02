@@ -1,11 +1,10 @@
 streamlit
 mysql-connector-python
-opencv-python-headless==4.9.0.80
 matplotlib
 numpy
 pandas
 joblib
 Pillow
-tensorflow>=2.16.1,<2.17.0
+tensorflow
 scikit-learn
 seaborn
