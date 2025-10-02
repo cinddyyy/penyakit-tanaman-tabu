@@ -3,7 +3,6 @@ import base64
 import mysql.connector
 import os
 from pathlib import Path
-import cv2
 import numpy as np
 import joblib
 from PIL import Image
@@ -118,15 +117,26 @@ class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 # Preprocessing Image
 # =========================
 def preprocess_image(image: Image.Image):
+    # Pastikan RGB
     image = image.convert("RGB")
-    img = np.array(image)
-    resized = cv2.resize(img, (448, 448))
-    h, w, _ = resized.shape
-    crop_h, crop_w = h // 2, w // 2
+
+    # Resize awal ke 448x448
+    resized = image.resize((448, 448), Image.Resampling.LANCZOS)
+
+    # Crop bagian tengah (setengah ukuran)
+    w, h = resized.size
+    crop_w, crop_h = w // 2, h // 2
     start_x, start_y = (w - crop_w) // 2, (h - crop_h) // 2
-    cropped = resized[start_y:start_y + crop_h, start_x:start_x + crop_w]
-    final_img = cv2.resize(cropped, (224, 224)).astype("float32")
-    return np.expand_dims(final_img, axis=0)
+    cropped = resized.crop((start_x, start_y, start_x + crop_w, start_y + crop_h))
+
+    # Resize hasil crop ke 224x224
+    final_img = cropped.resize((224, 224), Image.Resampling.LANCZOS)
+
+    # Convert ke NumPy array float32
+    final_array = np.array(final_img).astype("float32")
+
+    # Tambahkan dimensi batch
+    return np.expand_dims(final_array, axis=0)
 
 # =========================
 # Ekstraksi Fitur
