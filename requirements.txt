@@ -9,4 +9,3 @@ Pillow
 tensorflow
 scikit-learn
 seaborn
-python-3.11
