@@ -6,7 +6,7 @@ numpy
 pandas
 joblib
 Pillow
-tensorflow==2.15.0
+tensorflow==2.16.0
 keras==2.15.0
 scikit-learn
 seaborn
