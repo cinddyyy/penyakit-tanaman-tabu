@@ -1,6 +1,6 @@
 streamlit
 mysql-connector-python
-opencv-python
+opencv-python-headless==4.9.0.80
 matplotlib
 numpy
 pandas
