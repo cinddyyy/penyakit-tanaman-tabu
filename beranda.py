@@ -83,12 +83,14 @@ def insert_hasil_klasifikasi(id_gambar, nama_penyakit, tingkat_kepercayaan: floa
 # =========================
 @st.cache_resource(show_spinner=False)
 def load_feature_extractor_rgb():
-    input_tensor = layers.Input(shape=(224, 224, 3))
+    # Remove the input_tensor definition and pass input_shape directly to the model.
+    # This ensures the model is built correctly for 3 channels (RGB) before loading the weights.
     base_model = EfficientNetB7(
         weights="imagenet",
         include_top=False,
         pooling="avg",
-        input_tensor=input_tensor
+        # Pass the desired input shape directly: (224, 224, 3)
+        input_shape=(224, 224, 3) 
     )
     base_model.trainable = False
     return base_model
