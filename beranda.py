@@ -80,14 +80,16 @@ def insert_hasil_klasifikasi(id_gambar, nama_penyakit, tingkat_kepercayaan: floa
 # =========================
 # Load Feature Extractor (cached)
 # =========================
-@st.cache_resource(show_spinner=False)
-
+# @st.cache_resource(show_spinner=False) # Keep your Streamlit decorator here
 def load_feature_extractor_rgb():
+    # 1. REMOVE the separate layers.Input() line.
+    # 2. Use the input_shape argument to define the dimensions.
     base_model = EfficientNetB7(
         weights="imagenet",
         include_top=False,
         pooling="avg",
-        input_shape=(224, 224, 3)
+        # Use the standard Keras argument for input shape
+        input_shape=(224, 224, 3) 
     )
     base_model.trainable = False
     return base_model
