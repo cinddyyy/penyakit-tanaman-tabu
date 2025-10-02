@@ -83,13 +83,17 @@ def insert_hasil_klasifikasi(id_gambar, nama_penyakit, tingkat_kepercayaan: floa
 # =========================
 @st.cache_resource(show_spinner=False)
 def load_feature_extractor_rgb():
-    # Remove the input_tensor definition and pass input_shape directly to the model.
-    # This ensures the model is built correctly for 3 channels (RGB) before loading the weights.
+    # 1. REMOVE the layers.Input definition (line 86 in your original code)
+    # input_tensor = layers.Input(shape=(224, 224, 3)) 
+    
     base_model = EfficientNetB7(
         weights="imagenet",
         include_top=False,
         pooling="avg",
-        # Pass the desired input shape directly: (224, 224, 3)
+        # 2. REMOVE the input_tensor argument (which was causing the conflict)
+        # input_tensor=input_tensor 
+        
+        # 3. USE input_shape to explicitly build the 3-channel model structure.
         input_shape=(224, 224, 3) 
     )
     base_model.trainable = False
