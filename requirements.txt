@@ -2,7 +2,7 @@ streamlit
 mysql-connector-python
 opencv-python-headless
 matplotlib
-numpy>=1.25.2,<2.6.0  # Diperbarui untuk kompatibilitas dengan SciPy
+numpy
 pandas
 joblib
 Pillow
