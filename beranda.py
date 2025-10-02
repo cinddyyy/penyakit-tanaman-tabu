@@ -80,16 +80,23 @@ def insert_hasil_klasifikasi(id_gambar, nama_penyakit, tingkat_kepercayaan: floa
 # =========================
 # Load Feature Extractor (cached)
 # =========================
-# @st.cache_resource(show_spinner=False) # Keep your Streamlit decorator here
+st.cache_resource.clear()
+
+# =========================
+# Load Feature Extractor (EfficientNetB7)
+# REVISI INI MENGGUNAKAN input_tensor UNTUK MEMAKSA 3 CHANNEL
+# =========================
+@st.cache_resource
 def load_feature_extractor_rgb():
-    # 1. REMOVE the separate layers.Input() line.
-    # 2. Use the input_shape argument to define the dimensions.
+    # 1. Buat input tensor 3-channel secara eksplisit
+    input_tensor = layers.Input(shape=(224, 224, 3)) 
+    
+    # 2. Gunakan input_tensor saat membangun EfficientNetB7
     base_model = EfficientNetB7(
         weights="imagenet",
         include_top=False,
         pooling="avg",
-        # Use the standard Keras argument for input shape
-        input_shape=(224, 224, 3) 
+        input_tensor=input_tensor # Menggantikan input_shape
     )
     base_model.trainable = False
     return base_model
