@@ -82,21 +82,19 @@ def insert_hasil_klasifikasi(id_gambar, nama_penyakit, tingkat_kepercayaan: floa
 # Load Feature Extractor (cached)
 # =========================
 @st.cache_resource(show_spinner=False)
-def load_feature_extractor_rgb(v2_fix=True): 
-    # Use input_shape directly (This is the critical fix)
+def load_feature_extractor_rgb():
+    input_tensor = layers.Input(shape=(224, 224, 3))
     base_model = EfficientNetB7(
         weights="imagenet",
         include_top=False,
         pooling="avg",
-        input_shape=(224, 224, 3) 
+        input_tensor=input_tensor
     )
-    # TEMPORARY: Add a print statement to see if this code executes
-    print("--- EfficientNetB7 loaded with correct 3-channel input_shape! ---") 
     base_model.trainable = False
     return base_model
 
-# Call the function with the new argument
-feature_extractor = load_feature_extractor_rgb(v2_fix=True)
+feature_extractor = load_feature_extractor_rgb()
+
 
 # =========================
 # Load SVM Model (cached)
