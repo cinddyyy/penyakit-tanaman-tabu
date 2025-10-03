@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import numpy as np
 import joblib
+from pathlib import Path
 from PIL import Image
 import tensorflow as tf
 from tensorflow.keras.applications import EfficientNetB7
@@ -10,25 +11,12 @@ import cloudinary
 import cloudinary.uploader
 import gspread
 from google.oauth2.service_account import Credentials
+import base64
 
 # ==============================
 # Konfigurasi Halaman
 # ==============================
 st.set_page_config(page_title="Klasifikasi Daun Tebu", layout="wide")
-
-# CSS custom untuk warning
-st.markdown("""
-    <style>
-    .custom-warning {
-        padding: 10px;
-        background-color: #fff3cd;
-        color: #856404;
-        border-radius: 5px;
-        border: 1px solid #ffeeba;
-        margin-top: 10px;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 # ==============================
 # Konfigurasi Cloudinary
@@ -90,7 +78,6 @@ def load_svm_model(model_path: str):
 
 svm_model = load_svm_model("svm_K3_fold2_C10_Gamma0.01_iter1.pkl")
 
-# Label kelas
 class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 
 # ==============================
@@ -111,20 +98,135 @@ def extract_features(img_array, model):
     return model.predict(img_array, verbose=0)
 
 # ==============================
+# Fungsi untuk convert gambar ke base64
+# ==============================
+def get_base64(file_path: str) -> str:
+    with open(file_path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+# ==============================
+# Assets
+# ==============================
+hero_bg = get_base64("images/bg.png")
+ig_icon   = get_base64("images/ig.png")
+gh_icon   = get_base64("images/github.png")
+ln_icon   = get_base64("images/linkedln.png")
+user_icon = get_base64("images/user.png")
+
+penyakit_list = [
+    {"nama":"Healthy", "deskripsi":"Daun tebu sehat ditandai dengan warna hijau segar "
+    "dan pertumbuhan normal. Tidak ditemukan bercak, lesi, ataupun perubahan warna pada daun."
+    "Kondisi ini menunjukkan tanaman bebas dari serangan hama maupun penyakit.","gambar":get_base64("images/sehat bg.png")},
+    {"nama":"Mosaic", "deskripsi":"Gejala penyakit mosaik ditandai dengan bercak atau belang hijau dan kuning pada daun "
+    "semakin jelas saat terkena sinar matahari. Jika infeksi sudah parah, daun dapat mengalami klorosis total serta nekrosis berbentuk bintik merah.","gambar":get_base64("images/mosaic bg.png")},
+    {"nama":"Rust", "deskripsi":"Penyakit ini menyebar melalui spora yang terbawa angin, sehingga dapat dengan cepat"
+    " menginfeksi lahan tebu yang luas. Gejala ditandai dengan bintik hijau muda di daun kemudian perlahan berubah menjadi bercak cokelat.","gambar":get_base64("images/rust bg.png")},
+    {"nama":"Red Rot", "deskripsi":"Penyakit red rot dikenal sebagai kanker tebu disebabkan oleh jamur Colletotrichum falcatum. "
+    "Penyakit ini menyebabkan daun layu dan perubahan warna, terutama pada tulang daun menunjukkan lesi merah dengan tepi gelap.","gambar":get_base64("images/redrot bg.png")},
+    {"nama":"Yellow", "deskripsi":"Penyakit yellow disebabkan oleh Sugarcane yellow leaf virus (ScYLV) yang ditularkan kutu daun. "
+    "Gejalanya berupa penguningan pada tulang daun yang menyebar ke helaian daun, lebih parah di daerah dengan curah hujan tinggi.","gambar":get_base64("images/yellow bg.png")},
+]
+
+# ==============================
+# Muat style.css
+# ==============================
+style_path = Path("style.css")
+style = ""
+if style_path.exists():
+    style = style_path.read_text(encoding='utf-8')
+    st.markdown(f"<style>{style}</style>", unsafe_allow_html=True)
+else:
+    st.warning("File style.css tidak ditemukan!")
+
+style += f"""
+.hero {{
+    background: url("data:image/png;base64,{hero_bg}") no-repeat center center/cover;
+    height: 100vh;
+    width: 100%;
+    color: white;
+}}
+"""
+st.markdown(f"<style>{style}</style>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #f9fff9;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ==============================
+# Hero + Navbar
+# ==============================
+st.markdown(f"""
+<div class="hero">
+    <div class="navbar" id="beranda">
+        <div class="navbar-left">
+            <img src="data:image/png;base64,{user_icon}" alt="User">
+            <span>Patrisia Cindy</span>
+        </div>
+        <div class="navbar-right">
+            <a href="#beranda">Beranda</a>
+            <a href="#klasifikasi">Klasifikasi</a>
+        </div>
+    </div>
+    <div class="hero-text" >
+        <h2>Klasifikasi Penyakit Citra Daun Tebu Menggunakan EfficientNetB7-SVM</h2>
+        <p>
+            Penyakit pada daun tebu menjadi ancaman serius bagi industri tebu,
+            karena dapat menyebabkan kerusakan besar pada tanaman yang terinfeksi,
+            menurunkan hasil panen, serta menimbulkan kerugian finansial bagi para petani.
+            Deteksi dini terhadap penyakit ini melalui teknologi machine learning dapat mencegah
+            kerugian dan kerusakan yang lebih besar.
+            Penelitian ini menggunakan pendekatan hybrid, yaitu model CNN dengan arsitektur
+            EfficientNet-B7 sebagai ekstraksi fitur dan Support Vector Machine (SVM) sebagai model klasifikasi.
+        </p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ==============================
+# Bagian Contoh Penyakit
+# ==============================
+st.markdown('<div></div>', unsafe_allow_html=True)
+cols = st.columns(5)
+for idx, penyakit in enumerate(penyakit_list):
+    with cols[idx % 5]:
+        st.markdown(f"""
+            <div style="display:flex; justify-content:center;">
+                <div class="card overlay-card">
+                    <img src="data:image/png;base64,{penyakit['gambar']}" class="card-img" alt="{penyakit['nama']}">
+                    <div class="card-overlay">
+                        <h3>{penyakit['nama']}</h3>
+                        <p>{penyakit['deskripsi']}</p>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+# ==============================
 # Upload & Prediksi
 # ==============================
-st.title("🌱 Klasifikasi Penyakit Daun Tebu")
+# ==============================
+# Upload & Prediksi
+# ==============================
+st.markdown('<div class="section-judul" id="klasifikasi"><h3 class="cc">Klasifikasi Penyakit Citra Daun Tebu</h3></div>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Pilih File Gambar", type=["jpg", "jpeg", "png"])
+centered_col = st.columns([1, 2, 1])[1]
 
-# session state
 if "uploaded_path" not in st.session_state:
     st.session_state.uploaded_path = None
 if "uploaded_url" not in st.session_state:
     st.session_state.uploaded_url = None
 
-# Tombol unggah selalu ada
-if st.button("Unggah Gambar"):
+with centered_col:
+    uploaded_file = st.file_uploader("Pilih File", type=["jpg","jpeg","png"], label_visibility="collapsed")
+    upload_pressed = st.button("Unggah Gambar", use_container_width=True)
+
+if upload_pressed:
     if uploaded_file is None:
         st.markdown("<div class='custom-warning'>⚠ Silakan unggah gambar terlebih dahulu</div>", unsafe_allow_html=True)
     else:
@@ -134,33 +236,52 @@ if st.button("Unggah Gambar"):
         with open(file_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
 
-        # Upload ke Cloudinary
         url_gambar = upload_to_cloudinary(file_path)
-
-        # simpan ke session
         st.session_state.uploaded_path = file_path
         st.session_state.uploaded_url = url_gambar
 
-        st.success("✅ Gambar berhasil diunggah.")
-
-# Preview selalu tampil kalau sudah pernah upload
 if st.session_state.uploaded_path:
-    st.image(st.session_state.uploaded_path, width=224)
+    with centered_col:
+        st.image(st.session_state.uploaded_path, caption="Preview Gambar", width=224)
+        if st.button("Lihat Hasil Klasifikasi", use_container_width=True):
+            with st.spinner("Memproses gambar..."):
+                img = Image.open(st.session_state.uploaded_path)
+                proc_img = preprocess_image(img)
+                features = extract_features(proc_img, feature_extractor)
+                pred_label = svm_model.predict(features)[0]
+                confidence = float(np.max(svm_model.predict_proba(features)[0]))
+                if st.session_state.uploaded_url:
+                    simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
+                st.markdown(
+                    f'<div class="prediction-box">🌾 <b>Prediksi:</b> {pred_label}<br>📊 Tingkat Keyakinan: {confidence*100:.2f}%</div>',
+                    unsafe_allow_html=True
+                )
 
-# Tombol klasifikasi
-if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
-    with st.spinner("Memproses gambar..."):
-        img = Image.open(st.session_state.uploaded_path)
-        proc_img = preprocess_image(img)
-        features = extract_features(proc_img, feature_extractor)
-
-        pred_label = svm_model.predict(features)[0]
-        confidence = float(np.max(svm_model.predict_proba(features)[0]))
-
-        if st.session_state.uploaded_url:
-            simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
-
-        st.success(
-f"""🌾 **Prediksi: {pred_label}**  
-📊 **Tingkat Keyakinan: {confidence*100:.2f}%**"""
-        )
+# ==============================
+# Footer
+# ==============================
+st.markdown(f"""
+    <footer>
+        <div class="footer-container">
+            <div class="footer-left">
+                <p class="fw-bold">Universitas Sanata Dharma Yogyakarta</p>
+                <p class="fw-bold">Fakultas Sains & Teknologi</p>
+                <p>
+                    Kampus III, Paingan, Maguwoharjo, Kec. Depok <br>
+                    Daerah Istimewa Yogyakarta
+                </p>
+            </div>
+            <div class="footer-right">
+                <a href="https://www.instagram.com/patrisia__cindy?igsh=YmE5ZTdzZzF0cDFs">
+                    <img src="data:image/png;base64,{ig_icon}" alt="Instagram">
+                </a>
+                <a href="https://github.com/cinddyyy">
+                    <img src="data:image/png;base64,{gh_icon}" alt="GitHub">
+                </a>
+                <a href="https://www.linkedin.com/in/patrisia-cindy-paskariana-043629238/">
+                    <img src="data:image/png;base64,{ln_icon}" alt="LinkedIn">
+                </a>
+            </div>
+        </div>
+    </footer>
+""", unsafe_allow_html=True)
