@@ -136,6 +136,12 @@ if uploaded_file:
                 simpan_hasil(url_gambar, pred_label, confidence)
 
             # Tampilkan hasil
-            st.success(f"🌾 Prediksi: **{pred_label}**\n📊 Tingkat Keyakinan: **{confidence*100:.2f}%**")
+            with st.container():
+                st.success(
+                f"""
+                🌾 **Prediksi: {pred_label}**
+                📊 **Tingkat Keyakinan: {confidence*100:.2f}%** 
+                """
+                )
             if url_gambar:
                 st.markdown(f"[Lihat Gambar]({url_gambar})")
