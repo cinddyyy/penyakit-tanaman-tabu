@@ -16,6 +16,20 @@ from google.oauth2.service_account import Credentials
 # ==============================
 st.set_page_config(page_title="Klasifikasi Daun Tebu", layout="wide")
 
+# CSS custom untuk warning
+st.markdown("""
+    <style>
+    .custom-warning {
+        padding: 10px;
+        background-color: #fff3cd;
+        color: #856404;
+        border-radius: 5px;
+        border: 1px solid #ffeeba;
+        margin-top: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # ==============================
 # Konfigurasi Cloudinary
 # ==============================
@@ -26,7 +40,6 @@ cloudinary.config(
 )
 
 def upload_to_cloudinary(file_path: str) -> str:
-    """Upload file ke Cloudinary dan mengembalikan URL."""
     try:
         result = cloudinary.uploader.upload(file_path)
         return result["secure_url"]
@@ -46,7 +59,6 @@ client = gspread.authorize(credentials)
 sheet = client.open_by_url(st.secrets["gspread"]["sheet_url"]).sheet1
 
 def simpan_hasil(url_gambar, pred_label, confidence):
-    """Simpan hasil prediksi ke Google Sheets."""
     try:
         sheet.append_row([url_gambar, pred_label, f"{confidence*100:.2f}%"])
     except Exception as e:
@@ -85,7 +97,6 @@ class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 # Preprocessing Image
 # ==============================
 def preprocess_image(image: Image.Image):
-    """Resize dan crop sesuai pipeline training."""
     image = image.convert("RGB")
     resized = image.resize((448, 448), Image.Resampling.LANCZOS)
     w, h = resized.size
@@ -112,9 +123,11 @@ if "uploaded_path" not in st.session_state:
 if "uploaded_url" not in st.session_state:
     st.session_state.uploaded_url = None
 
-# Step 1: tombol unggah (preview muncul setelah tombol ditekan)
-if uploaded_file is not None:
-    if st.button("Unggah Gambar"):
+# Tombol unggah selalu ada
+if st.button("Unggah Gambar"):
+    if uploaded_file is None:
+        st.markdown("<div class='custom-warning'>⚠ Silakan unggah gambar terlebih dahulu</div>", unsafe_allow_html=True)
+    else:
         UPLOAD_FOLDER = "uploads"
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
         file_path = os.path.join(UPLOAD_FOLDER, uploaded_file.name)
@@ -129,14 +142,16 @@ if uploaded_file is not None:
         st.session_state.uploaded_url = url_gambar
 
         st.success("✅ Gambar berhasil diunggah.")
-        st.image(uploaded_file, caption="Preview Gambar", width=224)
-        if url_gambar:
-            st.markdown(f"[🌐 Lihat di Cloudinary]({url_gambar})")
 
-# Step 2: tombol klasifikasi setelah ada file yang diunggah
+# Preview selalu tampil kalau sudah pernah upload
+if st.session_state.uploaded_path:
+    st.image(st.session_state.uploaded_path, caption="Preview Gambar", width=224)
+    if st.session_state.uploaded_url:
+        st.markdown(f"[🌐 Lihat di Cloudinary]({st.session_state.uploaded_url})")
+
+# Tombol klasifikasi
 if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
     with st.spinner("Memproses gambar..."):
-        # Prediksi
         img = Image.open(st.session_state.uploaded_path)
         proc_img = preprocess_image(img)
         features = extract_features(proc_img, feature_extractor)
@@ -144,11 +159,9 @@ if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
         pred_label = svm_model.predict(features)[0]
         confidence = float(np.max(svm_model.predict_proba(features)[0]))
 
-        # Simpan ke Google Sheets
         if st.session_state.uploaded_url:
             simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
 
-        # Tampilkan hasil
         st.success(
 f"""🌾 **Prediksi: {pred_label}**  
 📊 **Tingkat Keyakinan: {confidence*100:.2f}%**"""
