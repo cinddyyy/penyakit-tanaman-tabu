@@ -1,15 +1,16 @@
-svm_K3_fold2_C10_Gamma0.01_iter1.pkl
-
 # Virtual env
 venv_311/
 venv/
 .env/
 
-# Model files
+# Model files (ignore semua, kecuali model utama)
 *.pkl
 *.h5
 *.pt
 *.joblib
+
+# Allow specific model file (wajib taruh setelah aturan ignore)
+!svm_K3_fold2_C10_Gamma0.01_iter1.pkl
 
 # Python cache
 __pycache__/
