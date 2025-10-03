@@ -27,9 +27,14 @@ cloudinary.config(
     api_secret=st.secrets["cloudinary"]["api_secret"]
 )
 
-def upload_to_cloudinary(file_path):
-    result = cloudinary.uploader.upload(file_path)
-    return result["secure_url"]
+def upload_to_cloudinary(file_path: str) -> str:
+    """Upload file ke Cloudinary dan mengembalikan URL."""
+    try:
+        result = cloudinary.uploader.upload(file_path)
+        return result["secure_url"]
+    except Exception as e:
+        st.error(f"Gagal upload ke Cloudinary: {e}")
+        return ""
 
 # ==============================
 # Konfigurasi Google Sheets
@@ -43,7 +48,11 @@ client = gspread.authorize(credentials)
 sheet = client.open_by_url(st.secrets["gspread"]["sheet_url"]).sheet1
 
 def simpan_hasil(url_gambar, pred_label, confidence):
-    sheet.append_row([url_gambar, pred_label, f"{confidence*100:.2f}%"])
+    """Simpan hasil prediksi ke Google Sheets."""
+    try:
+        sheet.append_row([url_gambar, pred_label, f"{confidence*100:.2f}%"])
+    except Exception as e:
+        st.warning(f"Gagal menyimpan ke Google Sheet: {e}")
 
 # ==============================
 # Load Feature Extractor (EfficientNetB7)
@@ -76,6 +85,7 @@ class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 # Preprocessing Image
 # ==============================
 def preprocess_image(image: Image.Image):
+    """Resize dan crop sesuai pipeline training."""
     image = image.convert("RGB")
     resized = image.resize((448, 448), Image.Resampling.LANCZOS)
     w, h = resized.size
@@ -119,8 +129,10 @@ if uploaded_file:
             pred_label = class_labels[int(pred_raw)]
 
             # Simpan ke Google Sheets
-            simpan_hasil(url_gambar, pred_label, confidence)
+            if url_gambar:
+                simpan_hasil(url_gambar, pred_label, confidence)
 
             # Tampilkan hasil
             st.success(f"🌾 Prediksi: **{pred_label}** ({confidence*100:.2f}%)")
-            st.markdown(f"[Lihat Gambar]({url_gambar})")
+            if url_gambar:
+                st.markdown(f"[Lihat Gambar]({url_gambar})")
