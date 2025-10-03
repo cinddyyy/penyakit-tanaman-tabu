@@ -145,9 +145,7 @@ if st.button("Unggah Gambar"):
 
 # Preview selalu tampil kalau sudah pernah upload
 if st.session_state.uploaded_path:
-    st.image(st.session_state.uploaded_path, caption="Preview Gambar", width=224)
-    if st.session_state.uploaded_url:
-        st.markdown(f"[🌐 Lihat di Cloudinary]({st.session_state.uploaded_url})")
+    st.image(st.session_state.uploaded_path, width=224)
 
 # Tombol klasifikasi
 if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
