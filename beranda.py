@@ -107,38 +107,49 @@ def extract_features(img_array, model):
 st.title("🌱 Klasifikasi Penyakit Daun Tebu")
 
 uploaded_file = st.file_uploader("Pilih File Gambar", type=["jpg", "jpeg", "png"])
+
+# variabel penampung sementara
+if "uploaded_path" not in st.session_state:
+    st.session_state.uploaded_path = None
+if "uploaded_url" not in st.session_state:
+    st.session_state.uploaded_url = None
+
+# Step 1: tombol unggah gambar
 if uploaded_file:
     st.image(uploaded_file, width=224)
 
-    if st.button("Lihat Hasil Klasifikasi"):
-        with st.spinner("Memproses gambar..."):
-            # Simpan sementara
-            UPLOAD_FOLDER = "uploads"
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            file_path = os.path.join(UPLOAD_FOLDER, uploaded_file.name)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
+    if st.button("Unggah Gambar"):
+        UPLOAD_FOLDER = "uploads"
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        file_path = os.path.join(UPLOAD_FOLDER, uploaded_file.name)
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
-            # Upload ke Cloudinary
-            url_gambar = upload_to_cloudinary(file_path)
+        # Upload ke Cloudinary
+        url_gambar = upload_to_cloudinary(file_path)
 
-            # Prediksi
-            img = Image.open(file_path)
-            proc_img = preprocess_image(img)
-            features = extract_features(proc_img, feature_extractor)
+        st.session_state.uploaded_path = file_path
+        st.session_state.uploaded_url = url_gambar
 
-            pred_label = svm_model.predict(features)[0]
-            confidence = float(np.max(svm_model.predict_proba(features)[0]))
+        st.success("✅ Gambar berhasil diunggah. Sekarang klik 'Lihat Hasil Klasifikasi'")
 
-            # Simpan ke Google Sheets
-            if url_gambar:
-                simpan_hasil(url_gambar, pred_label, confidence)
+# Step 2: tombol klasifikasi setelah ada file yang diunggah
+if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
+    with st.spinner("Memproses gambar..."):
+        # Prediksi
+        img = Image.open(st.session_state.uploaded_path)
+        proc_img = preprocess_image(img)
+        features = extract_features(proc_img, feature_extractor)
 
-            # Tampilkan hasil -> 2 baris
-            st.success(
+        pred_label = svm_model.predict(features)[0]
+        confidence = float(np.max(svm_model.predict_proba(features)[0]))
+
+        # Simpan ke Google Sheets
+        if st.session_state.uploaded_url:
+            simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
+
+        # Tampilkan hasil -> 2 baris
+        st.success(
 f"""🌾 **Prediksi: {pred_label}**  
 📊 **Tingkat Keyakinan: {confidence*100:.2f}%**"""
-            )
-
-            if url_gambar:
-                st.markdown(f"[Lihat Gambar]({url_gambar})")
+        )
