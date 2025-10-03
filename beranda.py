@@ -254,6 +254,8 @@ if st.session_state.uploaded_path:
             """,
             unsafe_allow_html=True
         )
+        st.markdown("<br>", unsafe_allow_html=True)
+
         if st.button("Lihat Hasil Klasifikasi", use_container_width=True):
             with st.spinner("Memproses gambar..."):
                 img = Image.open(st.session_state.uploaded_path)
