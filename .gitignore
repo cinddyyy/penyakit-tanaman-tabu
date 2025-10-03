@@ -1,2 +1,19 @@
-venv_311/
 svm_K3_fold2_C10_Gamma0.01_iter1.pkl
+
+# Virtual env
+venv_311/
+venv/
+.env/
+
+# Model files
+*.pkl
+*.h5
+*.pt
+*.joblib
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Uploads (jika tidak ingin di push)
+uploads/
