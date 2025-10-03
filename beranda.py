@@ -1,5 +1,4 @@
 import streamlit as st
-import base64
 import os
 import numpy as np
 import joblib
@@ -113,10 +112,8 @@ if "uploaded_path" not in st.session_state:
 if "uploaded_url" not in st.session_state:
     st.session_state.uploaded_url = None
 
-# Step 1: preview gambar
-if uploaded_file:
-    st.image(uploaded_file, caption="Preview Gambar", width=224)
-
+# Step 1: tombol unggah (preview muncul setelah tombol ditekan)
+if uploaded_file is not None:
     if st.button("Unggah Gambar"):
         UPLOAD_FOLDER = "uploads"
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -127,10 +124,12 @@ if uploaded_file:
         # Upload ke Cloudinary
         url_gambar = upload_to_cloudinary(file_path)
 
+        # simpan ke session
         st.session_state.uploaded_path = file_path
         st.session_state.uploaded_url = url_gambar
 
         st.success("✅ Gambar berhasil diunggah.")
+        st.image(uploaded_file, caption="Preview Gambar", width=224)
         if url_gambar:
             st.markdown(f"[🌐 Lihat di Cloudinary]({url_gambar})")
 
