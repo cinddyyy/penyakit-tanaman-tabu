@@ -242,7 +242,18 @@ if upload_pressed:
 
 if st.session_state.uploaded_path:
     with centered_col:
-        st.image(st.session_state.uploaded_path, caption="Preview Gambar", width=224)
+        # Convert gambar ke base64 supaya bisa pakai HTML dan posisi center
+        with open(st.session_state.uploaded_path, "rb") as f:
+            img_base64 = base64.b64encode(f.read()).decode()
+
+        st.markdown(
+            f"""
+            <div style="text-align:center;">
+                <img src="data:image/png;base64,{img_base64}" width="224">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         if st.button("Lihat Hasil Klasifikasi", use_container_width=True):
             with st.spinner("Memproses gambar..."):
                 img = Image.open(st.session_state.uploaded_path)
