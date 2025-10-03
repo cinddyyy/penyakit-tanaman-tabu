@@ -79,6 +79,8 @@ def load_svm_model(model_path: str):
     return joblib.load(model_path)
 
 svm_model = load_svm_model("svm_K3_fold2_C10_Gamma0.01_iter1.pkl")
+
+# Kalau mau, ini hanya untuk referensi:
 class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 
 # ==============================
@@ -124,9 +126,10 @@ if uploaded_file:
             img = Image.open(file_path)
             proc_img = preprocess_image(img)
             features = extract_features(proc_img, feature_extractor)
-            pred_raw = svm_model.predict(features)[0]
+
+            # Ambil label langsung dari model
+            pred_label = svm_model.predict(features)[0]
             confidence = float(np.max(svm_model.predict_proba(features)[0]))
-            pred_label = class_labels[int(pred_raw)]
 
             # Simpan ke Google Sheets
             if url_gambar:
