@@ -1,7 +1,6 @@
 import streamlit as st
 import base64
 import os
-from pathlib import Path
 import numpy as np
 import joblib
 from PIL import Image
@@ -80,7 +79,7 @@ def load_svm_model(model_path: str):
 
 svm_model = load_svm_model("svm_K3_fold2_C10_Gamma0.01_iter1.pkl")
 
-# Kalau mau, ini hanya untuk referensi:
+# Label kelas
 class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 
 # ==============================
@@ -108,15 +107,15 @@ st.title("🌱 Klasifikasi Penyakit Daun Tebu")
 
 uploaded_file = st.file_uploader("Pilih File Gambar", type=["jpg", "jpeg", "png"])
 
-# variabel penampung sementara
+# session state
 if "uploaded_path" not in st.session_state:
     st.session_state.uploaded_path = None
 if "uploaded_url" not in st.session_state:
     st.session_state.uploaded_url = None
 
-# Step 1: tombol unggah gambar
+# Step 1: preview gambar
 if uploaded_file:
-    st.image(uploaded_file, width=224)
+    st.image(uploaded_file, caption="Preview Gambar", width=224)
 
     if st.button("Unggah Gambar"):
         UPLOAD_FOLDER = "uploads"
@@ -131,7 +130,9 @@ if uploaded_file:
         st.session_state.uploaded_path = file_path
         st.session_state.uploaded_url = url_gambar
 
-        st.success("✅ Gambar berhasil diunggah. Sekarang klik 'Lihat Hasil Klasifikasi'")
+        st.success("✅ Gambar berhasil diunggah.")
+        if url_gambar:
+            st.markdown(f"[🌐 Lihat di Cloudinary]({url_gambar})")
 
 # Step 2: tombol klasifikasi setelah ada file yang diunggah
 if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
@@ -148,7 +149,7 @@ if st.session_state.uploaded_path and st.button("Lihat Hasil Klasifikasi"):
         if st.session_state.uploaded_url:
             simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
 
-        # Tampilkan hasil -> 2 baris
+        # Tampilkan hasil
         st.success(
 f"""🌾 **Prediksi: {pred_label}**  
 📊 **Tingkat Keyakinan: {confidence*100:.2f}%**"""
