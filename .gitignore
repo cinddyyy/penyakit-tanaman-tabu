@@ -21,3 +21,6 @@ uploads/
 
 # Secrets (jangan sampai ke-push ke GitHub)
 .streamlit/secrets.toml
+
+# Ignore Google Service Account credentials
+*.json
