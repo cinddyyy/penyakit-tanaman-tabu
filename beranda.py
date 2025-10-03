@@ -40,7 +40,7 @@ credentials = Credentials.from_service_account_info(
     scopes=scope
 )
 client = gspread.authorize(credentials)
-sheet = client.open_by_key(st.secrets["gcp"]["sheet_id"]).sheet1
+sheet = client.open_by_url(st.secrets["gspread"]["sheet_url"]).sheet1
 
 def simpan_hasil(url_gambar, pred_label, confidence):
     sheet.append_row([url_gambar, pred_label, f"{confidence*100:.2f}%"])
