@@ -115,7 +115,10 @@ def load_svm_model(model_path: str):
         st.error(f"Gagal memuat model SVM: {e}")
         return None
 
-svm_model = load_svm_model("svm_K3_fold2_C10_Gamma0.01_iter1")
+svm_model = load_svm_model("svm_K3_fold2_C10_Gamma0.01_iter1.pkl")
+
+if svm_model is None:
+    st.error("❌ Model SVM tidak berhasil dimuat. Periksa path dan ekstensi file.")
 
 # =========================
 # Label Kelas

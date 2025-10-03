@@ -1,9 +1,6 @@
-# Stable Core Dependencies
-tensorflow==2.15.0  # Stable version to fix the Shape Mismatch bug
-keras==2.15.0      # Keras version compatible with TF 2.15.0
-
-# Remaining Application Dependencies (Pinned for consistency where possible)
-streamlit==1.50.0 # Use the version visible in your Streamlit logs
+tensorflow==2.15.0
+keras==2.15.0
+streamlit==1.50.0
 mysql-connector-python
 matplotlib
 numpy
