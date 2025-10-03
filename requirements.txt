@@ -1,11 +1,22 @@
+# Core ML
 tensorflow==2.15.0
 keras==2.15.0
-streamlit==1.50.0
-mysql-connector-python
-matplotlib
+scikit-learn
+joblib
 numpy
 pandas
-joblib
-Pillow
-scikit-learn
+matplotlib
 seaborn
+
+# Image processing
+Pillow
+
+# Streamlit app
+streamlit==1.50.0
+
+# Cloudinary (untuk upload gambar)
+cloudinary
+
+# Google Sheets API
+gspread
+google-auth
