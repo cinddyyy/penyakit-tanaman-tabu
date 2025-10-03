@@ -210,23 +210,34 @@ for idx, penyakit in enumerate(penyakit_list):
 # ==============================
 # Upload & Prediksi
 # ==============================
-# ==============================
-# Upload & Prediksi
-# ==============================
 st.markdown('<div class="section-judul" id="klasifikasi"><h3 class="cc">Klasifikasi Penyakit Citra Daun Tebu</h3></div>', unsafe_allow_html=True)
 
 centered_col = st.columns([1, 2, 1])[1]
 
+# Session state init
+if "upload_clicked" not in st.session_state:
+    st.session_state.upload_clicked = False
+if "uploaded_file" not in st.session_state:
+    st.session_state.uploaded_file = None
 if "uploaded_path" not in st.session_state:
     st.session_state.uploaded_path = None
 if "uploaded_url" not in st.session_state:
     st.session_state.uploaded_url = None
 
+# File uploader
 with centered_col:
-    uploaded_file = st.file_uploader("Pilih File", type=["jpg","jpeg","png"], label_visibility="collapsed")
+    uploaded_file = st.file_uploader("Pilih File", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     upload_pressed = st.button("Unggah Gambar", use_container_width=True)
 
+    # Jika user klik ❌
+    if uploaded_file is None and st.session_state.uploaded_file is not None:
+        st.session_state.uploaded_file = None
+        st.session_state.uploaded_path = None
+        st.session_state.uploaded_url = None
+
+# Tombol unggah ditekan
 if upload_pressed:
+    st.session_state.upload_clicked = True
     if uploaded_file is None:
         st.markdown("<div class='custom-warning'>⚠ Silakan unggah gambar terlebih dahulu</div>", unsafe_allow_html=True)
     else:
@@ -237,12 +248,14 @@ if upload_pressed:
             f.write(uploaded_file.getbuffer())
 
         url_gambar = upload_to_cloudinary(file_path)
+
+        st.session_state.uploaded_file = uploaded_file
         st.session_state.uploaded_path = file_path
         st.session_state.uploaded_url = url_gambar
 
-if st.session_state.uploaded_path:
+# Preview & klasifikasi
+if st.session_state.uploaded_file and st.session_state.uploaded_path:
     with centered_col:
-        # Convert gambar ke base64 supaya bisa pakai HTML dan posisi center
         with open(st.session_state.uploaded_path, "rb") as f:
             img_base64 = base64.b64encode(f.read()).decode()
 
@@ -261,10 +274,19 @@ if st.session_state.uploaded_path:
                 img = Image.open(st.session_state.uploaded_path)
                 proc_img = preprocess_image(img)
                 features = extract_features(proc_img, feature_extractor)
-                pred_label = svm_model.predict(features)[0]
+
+                pred_raw = svm_model.predict(features)[0]
                 confidence = float(np.max(svm_model.predict_proba(features)[0]))
+
+                try:
+                    idx = int(pred_raw)
+                    pred_label = class_labels[idx] if 0 <= idx < len(class_labels) else str(pred_raw)
+                except Exception:
+                    pred_label = str(pred_raw)
+
                 if st.session_state.uploaded_url:
                     simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
+
                 st.markdown(
                     f'<div class="prediction-box">🌾 <b>Prediksi:</b> {pred_label}<br>📊 Tingkat Keyakinan: {confidence*100:.2f}%</div>',
                     unsafe_allow_html=True
