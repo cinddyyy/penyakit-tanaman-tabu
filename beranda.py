@@ -127,7 +127,6 @@ if uploaded_file:
             proc_img = preprocess_image(img)
             features = extract_features(proc_img, feature_extractor)
 
-            # Ambil label langsung dari model
             pred_label = svm_model.predict(features)[0]
             confidence = float(np.max(svm_model.predict_proba(features)[0]))
 
@@ -135,13 +134,11 @@ if uploaded_file:
             if url_gambar:
                 simpan_hasil(url_gambar, pred_label, confidence)
 
-            # Tampilkan hasil
-            with st.container():
-                st.success(
-                f"""
-                🌾 **Prediksi: {pred_label}**
-                📊 **Tingkat Keyakinan: {confidence*100:.2f}%** 
-                """
-                )
+            # Tampilkan hasil -> 2 baris
+            st.success(
+f"""🌾 **Prediksi: {pred_label}**  
+📊 **Tingkat Keyakinan: {confidence*100:.2f}%**"""
+            )
+
             if url_gambar:
                 st.markdown(f"[Lihat Gambar]({url_gambar})")
