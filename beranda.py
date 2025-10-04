@@ -297,9 +297,7 @@ if st.session_state.uploaded_file and st.session_state.uploaded_path:
             
 
         elif crop_option == "Crop Manual":
-            col_left, col_center, col_right = st.columns([1,2,1])
-            with col_center:
-                cropped_img = st_cropper(img, aspect_ratio=None)
+            cropped_img = st_cropper(img, aspect_ratio=None)
             if cropped_img is not None:
                 final_img = cropped_img
                 # Simpan hasil crop ke temporary path
