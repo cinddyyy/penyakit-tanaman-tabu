@@ -12,6 +12,7 @@ import cloudinary.uploader
 import gspread
 from google.oauth2.service_account import Credentials
 import base64
+from streamlit_cropper import st_cropper
 
 # ==============================
 # Konfigurasi Halaman
@@ -83,7 +84,18 @@ class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 # ==============================
 # Preprocessing Image
 # ==============================
+# ==============================
+# Fungsi Preprocessing
+# ==============================
 def preprocess_image(image: Image.Image):
+    """Resize ke 224x224 dan convert ke array"""
+    image = image.convert("RGB")
+    resized = image.resize((224, 224), Image.Resampling.LANCZOS)
+    final_array = np.array(resized).astype("float32")
+    return np.expand_dims(final_array, axis=0)
+
+def center_crop(image: Image.Image):
+    """Resize ke 448x448 lalu crop tengah jadi 224x224"""
     image = image.convert("RGB")
     resized = image.resize((448, 448), Image.Resampling.LANCZOS)
     w, h = resized.size
@@ -91,8 +103,7 @@ def preprocess_image(image: Image.Image):
     start_x, start_y = (w - crop_w) // 2, (h - crop_h) // 2
     cropped = resized.crop((start_x, start_y, start_x + crop_w, start_y + crop_h))
     final_img = cropped.resize((224, 224), Image.Resampling.LANCZOS)
-    final_array = np.array(final_img).astype("float32")
-    return np.expand_dims(final_array, axis=0)
+    return final_img
 
 def extract_features(img_array, model):
     return model.predict(img_array, verbose=0)
@@ -224,7 +235,9 @@ if "uploaded_path" not in st.session_state:
 if "uploaded_url" not in st.session_state:
     st.session_state.uploaded_url = None
 
-# File uploader
+# ==============================
+# Upload
+# ==============================
 with centered_col:
     uploaded_file = st.file_uploader("Pilih File", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     upload_pressed = st.button("Unggah Gambar", use_container_width=True)
@@ -253,44 +266,86 @@ if upload_pressed:
         st.session_state.uploaded_path = file_path
         st.session_state.uploaded_url = url_gambar
 
-# Preview & klasifikasi
+# ==============================
+# Crop & Prediksi
+# ==============================
 if st.session_state.uploaded_file and st.session_state.uploaded_path:
     with centered_col:
-        with open(st.session_state.uploaded_path, "rb") as f:
-            img_base64 = base64.b64encode(f.read()).decode()
+        img = Image.open(st.session_state.uploaded_path)
 
-        st.markdown(
-            f"""
-            <div style="text-align:center;">
-                <img src="data:image/png;base64,{img_base64}" width="224">
-            </div>
-            """,
-            unsafe_allow_html=True
+        # Pilihan crop
+        st.markdown("<b>✂️ Pilih metode crop sebelum klasifikasi</b>", unsafe_allow_html=True)
+        crop_option = st.radio(
+            "Metode Crop:",
+            ["Default (Crop Tengah)", "Crop Manual"],
+            index=0,
+            horizontal=True
         )
-        st.markdown("<br>", unsafe_allow_html=True)
 
-        if st.button("Lihat Hasil Klasifikasi", use_container_width=True):
-            with st.spinner("Memproses gambar..."):
-                img = Image.open(st.session_state.uploaded_path)
-                proc_img = preprocess_image(img)
-                features = extract_features(proc_img, feature_extractor)
+        final_img = None
 
-                pred_raw = svm_model.predict(features)[0]
-                confidence = float(np.max(svm_model.predict_proba(features)[0]))
+        if crop_option == "Default (Crop Tengah)":
+            final_img = center_crop(img)
+            st.markdown(
+                f"""
+                <div style="text-align:center;">
+                    <img src="data:image/png;base64,{get_base64(st.session_state.uploaded_path)}" width="224">
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
 
-                try:
-                    idx = int(pred_raw)
-                    pred_label = class_labels[idx] if 0 <= idx < len(class_labels) else str(pred_raw)
-                except Exception:
-                    pred_label = str(pred_raw)
-
-                if st.session_state.uploaded_url:
-                    simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
-
+        elif crop_option == "Crop Manual":
+            col_left, col_center, col_right = st.columns([1,2,1])
+            with col_center:
+                cropped_img = st_cropper(img, aspect_ratio=None)
+            if cropped_img is not None:
+                final_img = cropped_img
+                # Simpan hasil crop ke temporary path
+                temp_path = "temp_crop.png"
+                final_img.save(temp_path)
                 st.markdown(
-                    f'<div class="prediction-box">🌾 <b>Prediksi:</b> {pred_label}<br>📊 Tingkat Keyakinan: {confidence*100:.2f}%</div>',
+                    f"""
+                    <div style="text-align:center;">
+                        <img src="data:image/png;base64,{get_base64(temp_path)}" width="224">
+                    </div>
+                    """,
                     unsafe_allow_html=True
                 )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ==============================
+        # Prediksi
+        # ==============================
+        if final_img is not None:
+            if st.button("Lihat Hasil Klasifikasi", use_container_width=True):
+                with st.spinner("Memproses gambar..."):
+                    proc_img = preprocess_image(final_img)
+                    features = extract_features(proc_img, feature_extractor)
+
+                    pred_raw = svm_model.predict(features)[0]
+                    confidence = float(np.max(svm_model.predict_proba(features)[0]))
+
+                    try:
+                        idx = int(pred_raw)
+                        pred_label = class_labels[idx] if 0 <= idx < len(class_labels) else str(pred_raw)
+                    except Exception:
+                        pred_label = str(pred_raw)
+
+                    if st.session_state.uploaded_url:
+                        simpan_hasil(st.session_state.uploaded_url, pred_label, confidence)
+
+                    st.markdown(
+                        f"""
+                        <div class="prediction-box" style="text-align:center;">
+                            🌾 <b>Prediksi:</b> {pred_label}<br>
+                            📊 Tingkat Keyakinan: {confidence*100:.2f}%
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
 # ==============================
 # Footer

@@ -13,6 +13,7 @@ Pillow
 
 # Streamlit app
 streamlit==1.50.0
+streamlit-cropper
 
 # Cloudinary (untuk upload gambar)
 cloudinary
