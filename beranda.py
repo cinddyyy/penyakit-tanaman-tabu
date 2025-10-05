@@ -276,16 +276,16 @@ if st.session_state.uploaded_file and st.session_state.uploaded_path:
         # Pilihan crop
         col1, col2, col3 = st.columns([1,4,1])
         with col2:
-            st.markdown("<b>✂️ Pilih metode crop sebelum klasifikasi</b>", unsafe_allow_html=True)
+            st.markdown("<p class='crop-title'>✂️ Pilih metode crop sebelum klasifikasi</b>", unsafe_allow_html=True)
             crop_option = st.radio(
                 "Metode Crop:",
-                ["Default (Crop Tengah)", "Crop Manual"],
+                ["Tanpa Crop", "Crop Manual"],
                 index=0,
                 horizontal=True
             )
         final_img = None
 
-        if crop_option == "Default (Crop Tengah)":
+        if crop_option == "Tanpa Crop":
             final_img = center_crop(img)
             st.markdown(
                 f"""

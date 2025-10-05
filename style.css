@@ -320,6 +320,47 @@ footer .footer-right img:hover {
 }
 
 
+/* Judul crop (desktop) */
+
+.crop-title {
+    font-size: 18px !important;
+    font-weight: 600;
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    margin-top: 20px !important;
+}
+
+
+/* Label "Metode Crop:" */
+
+label[data-testid="stWidgetLabel"] p {
+    font-size: 16px !important;
+    font-weight: 500;
+    color: #333;
+    text-align: center !important;
+    margin: 0 auto 6px auto !important;
+    display: block;
+    margin-left: 47px !important;
+}
+
+div[role='radiogroup'] {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 18px !important;
+    margin-left: 50px !important;
+}
+
+div[role='radiogroup'] div[data-testid="stMarkdownContainer"] p {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
 /* ====== RESPONSIVE DESIGN ====== */
 
 @media (max-width: 480px) {
@@ -531,5 +572,35 @@ footer .footer-right img:hover {
     footer .footer-container p {
         font-size: 0.6rem;
         margin: 2px 0;
+    }
+    .crop-title {
+        font-size: 10px !important;
+        font-weight: 600;
+        text-align: center;
+        color: #333;
+        margin-top: -20px !important;
+    }
+    label[data-testid="stWidgetLabel"] p {
+        font-size: 9px !important;
+        margin-bottom: 2px !important;
+        text-align: center !important;
+        margin-left: 115px !important;
+        margin-top: -20px !important;
+    }
+    div[role='radiogroup'] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-left: 115px !important;
+        margin-top: -20px !important;
+    }
+    div[role='radiogroup'] div[data-testid="stMarkdownContainer"] p {
+        font-size: 9px !important;
+        font-weight: 500 !important;
+        color: #333 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 3 !important;
     }
 }
