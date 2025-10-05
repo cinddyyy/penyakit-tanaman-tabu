@@ -17,7 +17,7 @@ from streamlit_cropper import st_cropper
 # ==============================
 # Konfigurasi Halaman
 # ==============================
-st.set_page_config(page_title="Klasifikasi Daun Tebu", layout="wide")
+st.set_page_config(page_title="Klasifikasi Penyakit Citra Daun Tebu", layout="wide")
 
 # ==============================
 # Konfigurasi Cloudinary
