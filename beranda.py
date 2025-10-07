@@ -193,9 +193,11 @@ st.markdown(f"""
             Deteksi dini terhadap penyakit ini melalui teknologi machine learning dapat mencegah
             kerugian dan kerusakan yang lebih besar.
             Penelitian ini menggunakan pendekatan hybrid, yaitu model CNN dengan arsitektur
-            EfficientNet-B7 sebagai ekstraksi fitur dan Support Vector Machine (SVM) sebagai model klasifikasi.
-            <br>
-            Catatan: Aplikasi ini merupakan bagian dari penelitian akademik dan tidak untuk tujuan komersial.
+            EfficientNet-B7 sebagai ekstraksi fitur dan Support Vector Machine (SVM) sebagai model klasifikasi.  
+        </p>
+        <br>
+        <p> 
+            <strong>Catatan:</strong> Aplikasi ini merupakan bagian dari penelitian akademik dan tidak untuk tujuan komersial.
         </p>
     </div>
 </div>
@@ -358,7 +360,7 @@ st.markdown(f"""
                 <p class="fw-bold">Patrisia Cindy Paskariana</p>
                 <p class="fw-bold">Informatika, Fakultas Sains & Teknologi</p>
                 <p class="fw-bold">Universitas Sanata Dharma Yogyakarta</p>
-                <p class="fw-bold">2025</p>
+                <p>2025</p>
             </div>
             <div class="footer-right">
                 <a href="https://www.instagram.com/patrisia__cindy?igsh=YmE5ZTdzZzF0cDFs">
