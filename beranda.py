@@ -358,9 +358,7 @@ st.markdown(f"""
                 <p class="fw-bold">Patrisia Cindy Paskariana</p>
                 <p class="fw-bold">Informatika, Fakultas Sains & Teknologi</p>
                 <p class="fw-bold">Universitas Sanata Dharma Yogyakarta</p>
-                <p>
-                    2025
-                </p>
+                <p class="fw-bold">2025</p>
             </div>
             <div class="footer-right">
                 <a href="https://www.instagram.com/patrisia__cindy?igsh=YmE5ZTdzZzF0cDFs">
