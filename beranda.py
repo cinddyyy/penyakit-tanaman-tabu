@@ -77,7 +77,7 @@ feature_extractor = load_feature_extractor_rgb()
 def load_svm_model(model_path: str):
     return joblib.load(model_path)
 
-svm_model = load_svm_model("svm_rbf_K7_fold4_C100_Gamma0.001.pkl")
+svm_model = load_svm_model("svm_rbf_K7_fold7_C10_Gamma0.001.pkl")
 
 class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 

@@ -10,7 +10,7 @@ venv/
 *.joblib
 
 # Allow specific model file (wajib taruh setelah aturan ignore)
-!svm_K3_fold2_C10_Gamma0.01_iter1.pkl
+!svm_rbf_K7_fold7_C10_Gamma0.001.pkl
 !svm_rbf_K7_fold4_C100_Gamma0.001.pkl
 
 # Python cache
