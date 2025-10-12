@@ -77,15 +77,12 @@ feature_extractor = load_feature_extractor_rgb()
 def load_svm_model(model_path: str):
     return joblib.load(model_path)
 
-svm_model = load_svm_model("svm_K3_fold2_C10_Gamma0.01_iter1.pkl")
+svm_model = load_svm_model("svm_rbf_K7_fold4_C100_Gamma0.001.pkl")
 
 class_labels = ["Mosaic", "RedRot", "Rust", "Yellow", "Healthy"]
 
 # ==============================
 # Preprocessing Image
-# ==============================
-# ==============================
-# Fungsi Preprocessing
 # ==============================
 def preprocess_image(image: Image.Image):
     """Resize ke 224x224 dan convert ke array"""
